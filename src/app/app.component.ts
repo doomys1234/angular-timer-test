@@ -1,9 +1,4 @@
-import {
-  Component,
-  ViewChild,
-  ElementRef,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 import { Observable, fromEvent, merge, debounceTime } from 'rxjs';
 
@@ -34,41 +29,75 @@ export class AppComponent implements AfterViewInit {
   minutesVal!: ElementRef;
   @ViewChild('pauseButton')
   pauseButton!: ElementRef;
+  @ViewChild('startStopBtn')
+  startStopBtn!: ElementRef;
 
-  onStartClick(event: any) {
-    if (!this.running) {
-      this.running = true;
-      this.timerPaused =false
-      this.stream$.subscribe((val) => {
-        this.seconds++;
-        this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
+  onStartClick() {
+    const startStopBtn = this.startStopBtn.nativeElement;
+    const startStopBtnClassName = startStopBtn.className.split(' ')[1];
 
-        if (this.seconds > 9) {
-          this.secondsVal.nativeElement.textContent = `${this.seconds} seconds`;
-        }
-        if (this.seconds === 60) {
-          this.minutes++;
-          this.seconds = 0;
-          this.minutesVal.nativeElement.textContent = `0${this.minutes} minutes :`;
-          this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
+    switch (startStopBtnClassName) {
+      case 'start':
+        this.running = true;
+        if (this.running) {
+          this.runTime();
+          startStopBtn.textContent = 'Stop';
         }
 
-        if (this.minutes > 9) {
-          this.minutesVal.nativeElement.textContent = `${this.minutes} minutes :`;
+        break;
+
+      case 'stop':
+        this.running = false;
+        if (!this.running) {
+          this.stopTime();
+          startStopBtn.textContent = 'Start';
         }
-      });
+
+        break;
+
+      default:
+        break;
     }
   }
 
-  onResetClick(event: any) {
+  runTime() {
+    this.timerPaused = false;
+    this.stream$.subscribe((val) => {
+      this.seconds++;
+      this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
+
+      if (this.seconds > 9) {
+        this.secondsVal.nativeElement.textContent = `${this.seconds} seconds`;
+      }
+      if (this.seconds === 60) {
+        this.minutes++;
+        this.seconds = 0;
+        this.minutesVal.nativeElement.textContent = `0${this.minutes} minutes :`;
+        this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
+      }
+
+      if (this.minutes > 9) {
+        this.minutesVal.nativeElement.textContent = `${this.minutes} minutes :`;
+      }
+    });
+  }
+
+  stopTime() {
+    clearInterval(this.interval);
+    this.seconds = 0;
+    this.minutes = 0;
+    this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
+    this.minutesVal.nativeElement.textContent = `0${this.minutes} minutes :`;
+  }
+
+  onResetClick() {
     if (this.running || this.timerPaused) {
-      clearInterval(this.interval);
       this.seconds = 0;
       this.minutes = 0;
       this.secondsVal.nativeElement.textContent = `0${this.seconds} seconds`;
       this.minutesVal.nativeElement.textContent = `0${this.minutes} minutes :`;
-      this.running = false;
-      this.timerPaused = false;
+      clearInterval(this.interval);
+      this.runTime();
     }
   }
 
@@ -82,7 +111,6 @@ export class AppComponent implements AfterViewInit {
     eventsMerged.subscribe((event) => {
       if (event.type === 'dblclick') {
         pauseButton.textContent = 'Pause';
-        
         clearInterval(this.interval);
         this.timerPaused = true;
         this.running = false;

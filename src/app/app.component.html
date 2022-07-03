@@ -12,8 +12,8 @@
     </div>
 
     <div class="buttons-container">
-      <button class="button" (click)="onStartClick($event)" type="button">
-        Start
+      <button class="button" #startStopBtn (click)="onStartClick()" [ngClass]="running ? 'stop' : 'start'" type="button">
+        Start/Stop
       </button>
       <button
         [ngClass]="timerPaused ? 'paused' : ''"
@@ -24,7 +24,7 @@
       >
         Pause
       </button>
-      <button class="button" (click)="onResetClick($event)" type="button">
+      <button class="button" (click)="onResetClick()" type="button">
         Reset
       </button>
     </div>
